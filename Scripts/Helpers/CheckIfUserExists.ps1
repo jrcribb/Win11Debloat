@@ -1,31 +1,41 @@
 function CheckIfUserExists {
     param (
-        $userName
+        [string]$userName
     )
-
-    if ($userName -match '[<>:"|?*]') {
-        return $false
-    }
 
     if ([string]::IsNullOrWhiteSpace($userName)) {
         return $false
     }
 
+    $lookupName = $userName.Trim()
+
+    # Validate special characters against the local username segment (user in DOMAIN\user or user@domain).
+    $localUserName = GetLocalUserNameSegment -UserName $lookupName
+
+    if ($localUserName.IndexOfAny([System.IO.Path]::GetInvalidFileNameChars()) -ge 0) {
+        return $false
+    }
+
+    # PowerShell treats [] as wildcard chars in non-literal paths; disallow them explicitly.
+    if ($localUserName -match '[\[\]]') {
+        return $false
+    }
+
     try {
-        $userExists = Test-Path "$env:SystemDrive\Users\$userName"
+        $userContext = ResolveUserProfileContext -UserName $lookupName
+        if (-not $userContext -or [string]::IsNullOrWhiteSpace($userContext.ProfilePath)) {
+            return $false
+        }
 
-        if ($userExists) {
+        if ($lookupName -ieq 'Default') {
             return $true
         }
 
-        $userExists = Test-Path ($env:USERPROFILE -Replace ('\\' + $env:USERNAME + '$'), "\$userName")
+        return -not [string]::IsNullOrWhiteSpace($userContext.UserSid)
 
-        if ($userExists) {
-            return $true
-        }
     }
     catch {
-        Write-Error "Something went wrong when trying to find the user directory path for user $userName. Please ensure the user exists on this system"
+        Write-Error "Something went wrong when trying to find the user directory path for user $lookupName. Please ensure the user exists on this system"
     }
 
     return $false

@@ -402,7 +402,7 @@
       "ToolTip": "This will turn off the 'Find My Device' feature, which periodically sends your device's location to Microsoft. This feature uses policies, which will lock down certain settings.",
       "Category": "Privacy & Suggested Content",
       "RegistryKey": "Disable_Find_My_Device.reg",
-      "ApplyText": "> Disabling Find My Device location tracking...",
+      "ApplyText": "Disabling Find My Device location tracking...",
       "RegistryUndoKey": "Enable_Find_My_Device.reg",
       "MinVersion": null,
       "MaxVersion": null
@@ -479,7 +479,7 @@
       "ToolTip": "This will set the WSAIFabricSvc service to manual startup, preventing the service from starting automatically with Windows.",
       "Category": "AI",
       "RegistryKey": "Disable_AI_Service_Auto_Start.reg",
-      "ApplyText": "> Preventing AI service from starting automatically...",
+      "ApplyText": "Preventing AI service from starting automatically...",
       "RegistryUndoKey": "Enable_AI_Service_Auto_Start.reg",
       "MinVersion": 22621,
       "MaxVersion": null
@@ -607,7 +607,7 @@
       "ToolTip": "This will turn off Search Highlights, which shows dynamically curated branded content and trending topics in the Windows search box on the taskbar.",
       "Category": "Start Menu & Search",
       "RegistryKey": "Disable_Search_Highlights.reg",
-      "ApplyText": "> Disabling Search Highlights in the Windows search box...",
+      "ApplyText": "Disabling Search Highlights in the Windows search box...",
       "RegistryUndoKey": "Enable_Search_Highlights.reg",
       "MinVersion": 22621,
       "MaxVersion": null

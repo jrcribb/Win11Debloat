@@ -87,7 +87,7 @@ function Normalize-RegistryBackup {
         $errors.Add([string]$selectedFeatureParseError)
     }
 
-    $allowListValidationErrors = @(Test-RegistryBackupMatchesSelectedFeatures -SelectedFeatureIds @($selectedFeatures) -RegistryKeys @($normalizedKeys))
+    $allowListValidationErrors = @(Test-RegistryBackupMatchesSelectedFeatures -SelectedFeatureIds @($selectedFeatures) -Target $normalizedTarget -RegistryKeys @($normalizedKeys))
     foreach ($allowListValidationError in $allowListValidationErrors) {
         $errors.Add([string]$allowListValidationError)
     }

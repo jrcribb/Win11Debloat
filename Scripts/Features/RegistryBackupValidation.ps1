@@ -96,6 +96,8 @@ function Test-RegistryBackupMatchesSelectedFeatures {
         [AllowEmptyCollection()]
         [string[]]$SelectedFeatureIds,
         [Parameter(Mandatory)]
+        [string]$Target,
+        [Parameter(Mandatory)]
         [AllowEmptyCollection()]
         [object[]]$RegistryKeys
     )
@@ -108,10 +110,11 @@ function Test-RegistryBackupMatchesSelectedFeatures {
     }
 
     $selectedRegistryFeatures = @(Get-SelectedRegistryFeaturesForBackupValidation -SelectedFeatureIds @($SelectedFeatureIds) -Errors $errors)
+    $useSysprepRegFiles = ($Target -eq 'DefaultUserProfile') -or ($Target -like 'User:*')
 
     $capturePlans = @()
     if ($errors.Count -eq 0 -and $selectedRegistryFeatures.Count -gt 0) {
-        $capturePlans = @(Get-RegistryBackupCapturePlans -SelectedRegistryFeatures @($selectedRegistryFeatures))
+        $capturePlans = @(Get-RegistryBackupCapturePlans -SelectedRegistryFeatures @($selectedRegistryFeatures) -UseSysprepRegFiles:$useSysprepRegFiles)
     }
 
     $planMap = New-RegistryBackupAllowListPlanMap -CapturePlans @($capturePlans)

@@ -4,13 +4,47 @@ function Split-RegistryPath {
         [string]$path
     )
 
-    if ($path -notmatch '^(?<hive>HKEY_[^\\]+)(?:\\(?<subKey>.*))?$') {
+    $normalizedPath = [string]$path
+    if ([string]::IsNullOrWhiteSpace($normalizedPath)) {
         return $null
     }
 
+    $normalizedPath = $normalizedPath.Trim().Replace('/', '\')
+    if ([string]::IsNullOrWhiteSpace($normalizedPath)) {
+        return $null
+    }
+
+    if ($normalizedPath -notmatch '^(?<hive>HKEY_[^\\]+)(?:\\(?<subKey>.*))?$') {
+        return $null
+    }
+
+    $hiveName = [string]$matches.hive
+
+    $normalizedSubKey = if ($null -ne $matches.subKey) {
+        ([string]$matches.subKey).Trim('\\')
+    }
+    else {
+        $null
+    }
+
+    if ($hiveName.Equals('HKEY_USERS', [System.StringComparison]::OrdinalIgnoreCase) -and -not [string]::IsNullOrWhiteSpace($normalizedSubKey)) {
+        if ($normalizedSubKey -match '^(?<mount>[^\\]+)(?:\\(?<rest>.*))?$') {
+            $mountName = [string]$matches.mount
+            if ($mountName.Equals('.DEFAULT', [System.StringComparison]::OrdinalIgnoreCase)) {
+                $remainingSubKey = if ($matches.rest) { [string]$matches.rest } else { '' }
+                if ([string]::IsNullOrWhiteSpace($remainingSubKey)) {
+                    $normalizedSubKey = 'Default'
+                }
+                else {
+                    $normalizedSubKey = "Default\$remainingSubKey"
+                }
+            }
+        }
+    }
+
     return [PSCustomObject]@{
-        Hive = $matches.hive
-        SubKey = $matches.subKey
+        Hive = $hiveName
+        SubKey = $normalizedSubKey
     }
 }
 
@@ -33,10 +67,12 @@ function Get-RegistryRootKey {
 function Get-RegistryFilePathForFeature {
     param(
         [Parameter(Mandatory)]
-        $Feature
+        $Feature,
+        [switch]$UseSysprepRegFiles
     )
 
-    if ($script:Params.ContainsKey('Sysprep') -or $script:Params.ContainsKey('User')) {
+    $useSysprepLayout = $UseSysprepRegFiles -or $script:Params.ContainsKey('Sysprep') -or $script:Params.ContainsKey('User')
+    if ($useSysprepLayout) {
         return Join-Path (Join-Path $script:RegfilesPath 'Sysprep') $Feature.RegistryKey
     }
 

@@ -141,7 +141,7 @@ if (-not $isAdmin) {
 }
 
 # Define script-level variables & paths
-$script:Version = "2026.04.26"
+$script:Version = "2026.05.10"
 $configPath = Join-Path $PSScriptRoot 'Config'
 $logsPath = Join-Path $PSScriptRoot 'Logs'
 $schemasPath = Join-Path $PSScriptRoot 'Schemas'

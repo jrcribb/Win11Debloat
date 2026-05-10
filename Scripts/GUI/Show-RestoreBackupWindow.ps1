@@ -24,7 +24,7 @@ function Show-RestoreBackupWindow {
 
             Write-Host "User confirmed registry restore for $($backup.Target)."
             Restore-RegistryBackupState -Backup $backup
-            $successMessage = 'Registry backup restored successfully.'
+            $successMessage = 'Registry backup restored successfully. Please restart your computer for all changes to take effect.'
         }
         elseif ($dialogResult.Result -eq 'RestoreStartMenu') {
             $scope = $dialogResult.StartMenuScope

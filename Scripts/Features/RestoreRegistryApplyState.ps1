@@ -157,8 +157,14 @@ function Convert-RegistryValueDataFromBackup {
     )
 
     switch ($Kind) {
-        ([Microsoft.Win32.RegistryValueKind]::DWord) { return [uint32]$Data }
-        ([Microsoft.Win32.RegistryValueKind]::QWord) { return [uint64]$Data }
+        ([Microsoft.Win32.RegistryValueKind]::DWord) {
+            $unsigned = [uint32]$Data
+            return [BitConverter]::ToInt32([BitConverter]::GetBytes($unsigned), 0)
+        }
+        ([Microsoft.Win32.RegistryValueKind]::QWord) {
+            $unsigned = [uint64]$Data
+            return [BitConverter]::ToInt64([BitConverter]::GetBytes($unsigned), 0)
+        }
         ([Microsoft.Win32.RegistryValueKind]::MultiString) { return @($Data | ForEach-Object { [string]$_ }) }
         ([Microsoft.Win32.RegistryValueKind]::Binary) {
             $bytes = Convert-BackupDataToByteArray -Data $Data

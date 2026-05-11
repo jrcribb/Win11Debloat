@@ -226,12 +226,19 @@ function Convert-RegistryValueToSnapshot {
 
     $valueKind = $RegistryKey.GetValueKind($ValueName)
     $value = $RegistryKey.GetValue($ValueName, $null, [Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames)
-    $normalizedValue = switch ($valueKind) {
-        ([Microsoft.Win32.RegistryValueKind]::Binary) { @($value | ForEach-Object { [int]$_ }) }
-        ([Microsoft.Win32.RegistryValueKind]::MultiString) { @($value) }
-        ([Microsoft.Win32.RegistryValueKind]::DWord) { [uint32]$value }
-        ([Microsoft.Win32.RegistryValueKind]::QWord) { [uint64]$value }
-        default { if ($null -ne $value) { [string]$value } else { $null } }
+    try {
+        $normalizedValue = switch ($valueKind) {
+            ([Microsoft.Win32.RegistryValueKind]::Binary) { @($value | ForEach-Object { [int]$_ }) }
+            ([Microsoft.Win32.RegistryValueKind]::MultiString) { @($value) }
+            ([Microsoft.Win32.RegistryValueKind]::DWord) { [BitConverter]::ToUInt32([BitConverter]::GetBytes([int32]$value), 0) }
+            ([Microsoft.Win32.RegistryValueKind]::QWord) { [BitConverter]::ToUInt64([BitConverter]::GetBytes([int64]$value), 0) }
+            default { if ($null -ne $value) { [string]$value } else { $null } }
+        }
+    }
+    catch {
+        $valueType = if ($null -ne $value) { $value.GetType().FullName } else { '<null>' }
+        $valueForLog = if ($null -eq $value) { '<null>' } elseif ($value -is [array]) { ($value -join ',') } else { [string]$value }
+        throw "Failed to normalize registry value for backup. Key='$($RegistryKey.Name)' Name='$ValueName' Kind='$valueKind' RawType='$valueType' RawValue='$valueForLog'. InnerError: $($_.Exception.Message)"
     }
 
     return @{

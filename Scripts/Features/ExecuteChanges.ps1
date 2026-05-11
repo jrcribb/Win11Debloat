@@ -170,7 +170,12 @@ function ExecuteAllChanges {
         }
 
         Write-Host "> Creating registry backup..."
-        New-RegistrySettingsBackup -ActionableKeys $actionableKeys | Out-Null
+        try {
+            New-RegistrySettingsBackup -ActionableKeys $actionableKeys | Out-Null
+        }
+        catch {
+            throw "Registry backup failed before applying changes. $($_.Exception.Message)"
+        }
     }
     
     # Create restore point if requested (CLI only - GUI handles this separately)

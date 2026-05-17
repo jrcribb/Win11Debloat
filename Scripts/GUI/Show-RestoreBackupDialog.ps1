@@ -255,7 +255,7 @@ function Show-RestoreBackupDialog {
 
         $openDialog = New-Object Microsoft.Win32.OpenFileDialog
         $openDialog.Title = 'Select Registry Backup File'
-        $openDialog.Filter = 'Registry backup (*.json)|*.json|All files (*.*)|*.*'
+        $openDialog.Filter = 'Registry backup (*.json)|*.json'
         $openDialog.DefaultExt = '.json'
         $openDialog.InitialDirectory = $script:RegistryBackupsPath
 
